@@ -93,42 +93,6 @@ const initialImages = [
   },
 ];
 
-function Countdown() {
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-
-  useEffect(() => {
-    const calc = () => {
-      const now = new Date();
-      const diff = BIRTHDAY_DATE.getTime() - now.getTime();
-      if (diff <= 0) return;
-      setTimeLeft({
-        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((diff / (1000 * 60)) % 60),
-        seconds: Math.floor((diff / 1000) % 60),
-      });
-    };
-    calc();
-    const id = setInterval(calc, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  return (
-    <div className="countdown-wrapper">
-      <p className="countdown-label">Counting down to your special day 🎀</p>
-      <div className="countdown-grid">
-        {Object.entries(timeLeft).map(([unit, val]) => (
-          <div className="countdown-block" key={unit}>
-            <div className="countdown-card">
-              <span className="countdown-num">{String(val).padStart(2, "0")}</span>
-            </div>
-            <span className="countdown-unit">{unit}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function Pin({ color }: { color: string }) {
   return (
