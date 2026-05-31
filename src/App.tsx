@@ -1,7 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import "./App.css";
-
-const BIRTHDAY_DATE = new Date("2026-06-23T00:00:00");
 
 const notes = [
   {
@@ -35,7 +33,7 @@ const notes = [
     lineColor: "#aee8c0",
     title: "אהבה ❤️",
     message:
-      "Waiting for your text feels like Eternity, but it’s a beautiful kind of eternity that I want to get lost in. I hope this year brings you as much happiness and love as you have given me just by being you.",
+      "Waiting for your text feels like Eternity, but it's a beautiful kind of eternity that I want to get lost in. I hope this year brings you as much happiness and love as you have given me just by being you.",
   },
   {
     id: 4,
@@ -51,69 +49,51 @@ const notes = [
 ];
 
 const initialImages = [
-  {
-    id: 1,
-    src: "/eating.jpg", // Add your image to public/photo1.jpg
-    caption: "Loungefly 🪽",
-  },
-  {
-    id: 2,
-    src: "/thames.jpg", // Add your image to public/photo2.jpg
-    caption: "Thames River 🌊",
-  },
-  {
-    id: 3,
-    src: "/scarf.jpg", // Add your image to public/photo3.jpg
-    caption: "Nice Scarf 🧣",
-  },
-  {
-    id: 4,
-    src: "/scarf0.jpg", // Add your image to public/photo4.jpg
-    caption: "❤️",
-  },
-  {
-    id: 5,
-    src: "/telephone.jpg", // Add your image to public/photo5.jpg
-    caption: "Telephone Box ☎️",
-  },
-  {
-    id: 6,
-    src: "/goblet.jpg", // Add your image to public/photo6.jpg
-    caption: "Gemino Curse 👺",
-  },
-  {
-    id: 7,
-    src: "/scarf2.jpg", // Add your image to public/photo7.jpg
-    caption: "Somewhere beautiful 🌸",
-  },
-  {
-    id: 8,
-    src: "/eden.jpeg", // Add your image to public/photo8.jpg
-    caption: "🤍💛",
-  },
+  { id: 1, src: "/eating.jpg", caption: "Loungefly 🪽" },
+  { id: 2, src: "/thames.jpg", caption: "Thames River 🌊" },
+  { id: 3, src: "/scarf.jpg", caption: "Nice Scarf 🧣" },
+  { id: 4, src: "/scarf0.jpg", caption: "❤️" },
+  { id: 5, src: "/telephone.jpg", caption: "Telephone Box ☎️" },
+  { id: 6, src: "/goblet.jpg", caption: "Gemino Curse 👺" },
+  { id: 7, src: "/scarf2.jpg", caption: "Somewhere beautiful 🌸" },
+  { id: 8, src: "/eden.jpeg", caption: "🤍💛" },
 ];
 
+// Extend CSSProperties to allow CSS custom properties
+interface CSSPropertiesWithVars extends React.CSSProperties {
+  [key: `--${string}`]: string | number;
+}
+
+interface ImageItem {
+  id: number;
+  src: string;
+  caption: string;
+}
 
 function Pin({ color }: { color: string }) {
   return (
     <div className="pin-wrap">
-      <div className="pin-head" style={{ background: `radial-gradient(circle at 35% 35%, #fff6, transparent 60%), ${color}` }} />
+      <div
+        className="pin-head"
+        style={{
+          background: `radial-gradient(circle at 35% 35%, #fff6, transparent 60%), ${color}`,
+        }}
+      />
       <div className="pin-shaft" />
     </div>
   );
 }
 
-function Note({ note, delay }: { note: typeof notes[0], delay: string }) {
+function Note({ note, delay }: { note: typeof notes[0]; delay: string }) {
+  const style: CSSPropertiesWithVars = {
+    "--rot": note.rotation,
+    "--bg": note.bg,
+    "--line": note.lineColor,
+    animationDelay: delay,
+  };
+
   return (
-    <div
-      className="note"
-      style={{
-        "--rot": note.rotation,
-        "--bg": note.bg,
-        "--line": note.lineColor,
-        animationDelay: delay,
-      }}
-    >
+    <div className="note" style={style}>
       <Pin color={note.pinColor} />
       <div className="note-inner">
         <div className="note-lines" aria-hidden="true">
@@ -130,12 +110,22 @@ function Note({ note, delay }: { note: typeof notes[0], delay: string }) {
 
 const ROT = [-3, 2, -1.5, 2.5, -2, 3, -2.5, 1.5];
 
-function Polaroid({ image, index, onAdd }) {
+function Polaroid({
+  image,
+  index,
+  onAdd,
+}: {
+  image: ImageItem;
+  index: number;
+  onAdd: () => void;
+}) {
+  const style: CSSPropertiesWithVars = {
+    "--pr": `${ROT[index % ROT.length]}deg`,
+    animationDelay: `${index * 0.08}s`,
+  };
+
   return (
-    <div
-      className="polaroid"
-      style={{ "--pr": `${ROT[index % ROT.length]}deg`, animationDelay: `${index * 0.08}s` }}
-    >
+    <div className="polaroid" style={style}>
       <div className="pol-photo" onClick={!image.src ? onAdd : undefined}>
         {image.src ? (
           <img src={image.src} alt={image.caption} />
@@ -146,7 +136,9 @@ function Polaroid({ image, index, onAdd }) {
           </div>
         )}
         {image.src && (
-          <button className="pol-change" onClick={onAdd} title="Change photo">✎</button>
+          <button className="pol-change" onClick={onAdd} title="Change photo">
+            ✎
+          </button>
         )}
       </div>
       <div className="pol-caption">{image.caption}</div>
@@ -155,8 +147,8 @@ function Polaroid({ image, index, onAdd }) {
 }
 
 export default function App() {
-  const [images, setImages] = useState(initialImages);
-  const audioRef = useRef(null);
+  const [images, setImages] = useState<ImageItem[]>(initialImages);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const toggleMusic = () => {
@@ -168,31 +160,31 @@ export default function App() {
         if (!audioRef.current.src) {
           audioRef.current.src = "/background-music.mp3";
         }
-        audioRef.current.play().catch(() => console.log('Playback failed'));
+        audioRef.current.play().catch(() => console.log("Playback failed"));
         setIsPlaying(true);
       }
     }
   };
 
-  const handleAdd = (index) => {
+  const handleAdd = (index: number) => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
     input.onchange = (e) => {
-      const file = e.target.files[0];
+      const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
       const url = URL.createObjectURL(file);
-      setImages((prev) => prev.map((img, i) => (i === index ? { ...img, src: url } : img)));
+      setImages((prev) =>
+        prev.map((img, i) => (i === index ? { ...img, src: url } : img))
+      );
     };
     input.click();
   };
 
   return (
     <div className="app">
-      {/* Background Music */}
-      <audio ref={audioRef} loop style={{ display: 'none' }} />
+      <audio ref={audioRef} loop style={{ display: "none" }} />
 
-      {/* Floating petals */}
       <div className="petals" aria-hidden="true">
         {Array.from({ length: 18 }).map((_, i) => (
           <span
@@ -210,7 +202,6 @@ export default function App() {
         ))}
       </div>
 
-      {/* ─── HERO ─── */}
       <section className="hero">
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-text">
@@ -221,21 +212,39 @@ export default function App() {
             <em className="hero-name">Eden</em>
           </h1>
         </div>
-        <div className="music-control" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 10 }}>
-          <button onClick={toggleMusic} style={{ fontSize: '24px', background: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '50%', width: '50px', height: '50px', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
-            {isPlaying ? '🔊' : '🔇'}
+        <div
+          className="music-control"
+          style={{
+            position: "absolute",
+            top: "20px",
+            right: "20px",
+            zIndex: 10,
+          }}
+        >
+          <button
+            onClick={toggleMusic}
+            style={{
+              fontSize: "24px",
+              background: "rgba(255,255,255,0.8)",
+              border: "none",
+              borderRadius: "50%",
+              width: "50px",
+              height: "50px",
+              cursor: "pointer",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+            }}
+          >
+            {isPlaying ? "🔊" : "🔇"}
           </button>
         </div>
         <div className="hero-scroll-hint">↓</div>
       </section>
 
-      {/* ─── BULLETIN BOARD ─── */}
       <section className="board-section">
         <div className="section-header">
           <span className="section-tag">pinned just for you</span>
           <h2 className="section-title">Notes from my heart</h2>
         </div>
-
         <div className="cork-board">
           <div className="cork-texture" aria-hidden="true" />
           <div className="cork-frame" aria-hidden="true" />
@@ -247,7 +256,6 @@ export default function App() {
         </div>
       </section>
 
-      {/* ─── GALLERY ─── */}
       <section className="gallery-section">
         <div className="section-header">
           <span className="section-tag">places & moments</span>
@@ -261,12 +269,9 @@ export default function App() {
         </div>
       </section>
 
-      {/* ─── FOOTER ─── */}
       <footer className="footer">
         <div className="footer-inner">
-          <p className="footer-msg">
-            Made with every bit of love I have.
-          </p>
+          <p className="footer-msg">Made with every bit of love I have.</p>
           <p className="footer-hearts">♥ ♥ ♥</p>
         </div>
       </footer>
